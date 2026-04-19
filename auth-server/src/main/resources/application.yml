@@ -1,3 +1,77 @@
+# auth-server/src/main/resources/application.yml
+
+server:
+  port: 9000  # Auth Server runs on port 9000
+
 spring:
   application:
     name: auth-server
+
+  datasource:
+    # PostgreSQL connection URL format:
+    #   jdbc:postgresql://<host>:<port>/<database-name>
+    #
+    # Running locally (no Docker): host = localhost, port = 5432 (PostgreSQL default)
+    # You need PostgreSQL installed on your computer.
+    #
+    # Create the database before starting the app:
+    #   Open terminal ? psql -U postgres ? CREATE DATABASE authdb;
+    url: jdbc:postgresql://localhost:5432/authdb
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      # ddl-auto controls what Hibernate does with the DB schema on startup:
+      #
+      #   create      = drop all tables and recreate (loses all data!)
+      #   create-drop = create on start, drop everything on shutdown
+      #   update      = add missing tables/columns, never delete existing ones ? USE THIS
+      #   validate    = check schema matches entities, throw error if not
+      #   none        = do nothing (manage schema yourself)
+      #
+      # "update" is perfect for development ? adds new tables automatically
+      # without deleting your data.
+      ddl-auto: update
+
+    # Print the generated SQL queries to the console.
+    # Useful for learning and debugging. Turn off in production.
+    show-sql: true
+
+    properties:
+      hibernate:
+        # format_sql = pretty-print SQL in the console (easier to read)
+        format_sql: true
+        # Tell Hibernate which SQL "dialect" to use (PostgreSQL-specific syntax)
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# ============================================================
+# ADMIN API SECRET
+# ============================================================
+# This secret protects the /admin/** endpoints.
+#
+# How it works:
+#   1. Service B reads this value from ITS OWN application.yml (same value)
+#   2. Service B sends header: X-Admin-Secret: <this value>
+#   3. AdminSecretFilter checks: does the header match this value?
+#   4. Match ? allow. No match ? 401/403 rejected.
+#
+# ?? PRODUCTION RULE:
+#   - Never commit real secrets to Git
+#   - Use environment variables in production:
+#       export ADMIN_SECRET=my-real-secret
+#       admin.secret=${ADMIN_SECRET}
+#   - Make it long (32+ chars) and random
+#
+# For development, this placeholder value is fine:
+admin:
+  secret: "dev-admin-secret-change-in-production-xyz-12345"
+
+# Logging levels ? controls what gets printed to console
+logging:
+  level:
+    # Show all Spring Security debug logs (very helpful while learning)
+    org.springframework.security: DEBUG
+    # Show our own application logs
+    com.project.authserver: DEBUG
