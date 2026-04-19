@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>shared-library</module>
+        <module>auth-server</module>
     </modules>
 
     <properties>
